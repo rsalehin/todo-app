@@ -18,6 +18,7 @@ def test_missing_secret_key_is_rejected(monkeypatch):
 
 def test_defaults_apply_when_not_set(monkeypatch):
     monkeypatch.setenv("SECRET_KEY", "abc123")
+    monkeypatch.delenv("DATABASE_URL", raising=False)
     settings = Settings(_env_file=None)
     assert settings.app_name == "Todo API"
     assert settings.database_url == "sqlite:///./todosapp.db"
