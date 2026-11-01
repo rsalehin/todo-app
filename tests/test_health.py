@@ -19,3 +19,8 @@ def test_unknown_path_returns_404():
 def test_wrong_method_returns_405():
     response = client.post("/health")
     assert response.status_code == 405
+
+
+def test_docs_use_app_name_from_settings():
+    response = client.get("/openapi.json")
+    assert response.json()["info"]["title"] == "Todo API"
