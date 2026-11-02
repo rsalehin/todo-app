@@ -30,3 +30,27 @@ class UserPublic(BaseModel):
 class PasswordChange(BaseModel):
     current_password: str
     new_password: Password
+
+
+class TodoBase(BaseModel):
+    """Fields shared by create, update and response."""
+
+    title: Annotated[str, Field(min_length=3, max_length=100)]
+    description: Annotated[str, Field(min_length=3, max_length=100)]
+    priority: Annotated[int, Field(ge=1, le=5)]
+    completed: bool = False
+
+
+class TodoCreate(TodoBase):
+    pass
+
+
+class TodoUpdate(TodoBase):
+    """Put replaces the whole todo, so every field is required, as in create."""
+
+
+class TodoPublic(TodoBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    owner_id: int

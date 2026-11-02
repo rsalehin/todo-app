@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.models import User
-from app.schemas import PasswordChange, UserCreate, UserPublic
+from app.schemas import PasswordChange, TodoCreate, UserCreate, UserPublic
 
 VALID_USER = {
     "username": "alice",
@@ -61,3 +61,26 @@ def test_password_change_enforces_password_rules():
     with pytest.raises(ValidationError) as error:
         PasswordChange.model_validate({"current_password": "anything", "new_password": "1"})
     assert error.value.errors()[0]["loc"] == ("new_password",)
+
+
+def test_numeric_string_priority_is_coerced():
+    todo = TodoCreate.model_validate(
+        {
+            "title": "Buy Milk",
+            "description": "Oat",
+            "priority": "4",
+        }
+    )
+    assert todo.priority == 4
+    assert todo.completed is False
+
+
+def test_priority_must_be_between_one_and_five():
+    with pytest.raises(ValidationError):
+        TodoCreate.model_validate(
+            {
+                "title": "Buy Milk",
+                "description": "Two bottles",
+                "priority": "6",
+            }
+        )
