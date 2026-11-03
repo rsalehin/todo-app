@@ -7,6 +7,7 @@ from pwdlib import PasswordHash
 from app.config import settings
 
 password_hash = PasswordHash.recommended()
+DUMMY_HASH = password_hash.hash("dummy-password-used-for-timing")
 
 
 def hash_password(password: str) -> str:

@@ -32,6 +32,11 @@ class PasswordChange(BaseModel):
     new_password: Password
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
 class TodoBase(BaseModel):
     """Fields shared by create, update and response."""
 
