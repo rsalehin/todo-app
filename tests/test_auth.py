@@ -21,3 +21,15 @@ def test_register_ignores_role_in_body(client):
     response = client.post("/auth/register", json={**NEW_USER, "role": "admin"})
     assert response.status_code == 201
     assert response.json()["role"] == "user"
+
+
+def test_register_duplicate_username_is_409(client):
+    client.post("/auth/register", json=NEW_USER)
+    response = client.post("/auth/register", json={**NEW_USER, "email": "other@example.com"})
+    assert response.status_code == 409
+
+
+def test_register_invalid_body_is_422(client):
+    response = client.post("/auth/register", json={**NEW_USER, "email": "nope"})
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["body", "email"]
