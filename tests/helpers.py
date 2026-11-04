@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.models import User
-from app.security import hash_password
+from app.security import create_access_token, hash_password
 
 password = "it-is-a-fake-password"
 
@@ -18,3 +18,8 @@ def create_user(db: Session, username: str) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+
+def auth_headers(user: User) -> dict[str, str]:
+    token = create_access_token(subject=str(user.id))
+    return {"Authorization": f"Bearer {token}"}
