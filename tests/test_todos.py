@@ -69,3 +69,26 @@ def test_read_missing_todo_is_404(client, db):
     alice = create_user(db, "alice")
     response = client.get("/todos/999", headers=auth_headers(alice))
     assert response.status_code == 404
+
+
+def test_update_my_todo(client, db):
+    user = create_user(db, "alice")
+    todo = create_todo(db, user)
+    changes = {"title": "Buy oat milk", "description": "2 litres", "priority": 1, "completed": True}
+    response = client.put(f"todos/{todo.id}", json=changes, headers=auth_headers(user))
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "Buy oat milk"
+    assert body["completed"] is True
+
+
+def test_update_someone_elses_todo_is_404(client, db):
+    alice = create_user(db, "alice")
+    bob = create_user(db, "bob")
+    bobs_todo = create_todo(db, bob)
+    changes = {"title": "Hacked", "description": "by alice", "priority": 1, "completed": True}
+    response = client.put(f"/todos/{bobs_todo.id}", json=changes, headers=auth_headers(alice))
+    assert response.status_code == 404
+    db.refresh(bobs_todo)
+    assert bobs_todo.title == "Buy milk"
