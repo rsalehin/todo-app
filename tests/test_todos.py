@@ -1,4 +1,4 @@
-from tests.helpers import auth_headers, create_user
+from tests.helpers import auth_headers, create_todo, create_user
 
 NEW_TODO = {"title": "Buy milk", "description": "2 litres, oat", "priority": 3}
 
@@ -33,3 +33,17 @@ def test_create_todo_with_invalid_priority_is_422(client, db):
     data["priority"] = 6
     response = client.post("/todos", json=data, headers=auth_headers(alice))
     assert response.status_code == 422
+
+
+def test_list_shows_only_my_todos(client, db):
+    alice = create_user(db, "alice")
+    bob = create_user(db, "bob")
+    create_todo(db, alice, title="Alice's todo")
+    create_todo(db, bob, title="Bob's todo")
+
+    response = client.get("/todos", headers=auth_headers(alice))
+    assert response.status_code == 200
+    titles = []
+    for todo in response.json():
+        titles.append(todo["title"])
+    assert titles == ["Alice's todo"]
