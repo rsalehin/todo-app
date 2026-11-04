@@ -47,3 +47,25 @@ def test_list_shows_only_my_todos(client, db):
     for todo in response.json():
         titles.append(todo["title"])
     assert titles == ["Alice's todo"]
+
+
+def test_read_my_todo(client, db):
+    alice = create_user(db, "alice")
+    todo = create_todo(db, alice)
+    response = client.get(f"/todos/{todo.id}", headers=auth_headers(alice))
+    assert response.status_code == 200
+    assert response.json()["title"] == "Buy milk"
+
+
+def test_read_someone_elses_todo_is_404(client, db):
+    alice = create_user(db, "alice")
+    bob = create_user(db, "bob")
+    bobs_todo = create_todo(db, bob)
+    response = client.get(f"/todos/{bobs_todo.id}", headers=auth_headers(alice))
+    assert response.status_code == 404
+
+
+def test_read_missing_todo_is_404(client, db):
+    alice = create_user(db, "alice")
+    response = client.get("/todos/999", headers=auth_headers(alice))
+    assert response.status_code == 404
