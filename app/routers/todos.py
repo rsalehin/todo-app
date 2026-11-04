@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status
+from sqlalchemy import select
 
 from app.dependencies import CurrentUser, DbSession
 from app.models import Todo
@@ -21,3 +22,11 @@ def create_todo(payload: TodoCreate, user: CurrentUser, db: DbSession) -> Todo:
     db.commit()
     db.refresh(todo)
     return todo
+
+
+@router.get("", response_model=list[TodoPublic])
+def list_todos(db: DbSession, user: CurrentUser) -> list[Todo]:
+    statement = select(Todo).where(Todo.owner_id == user.id)
+    statement = statement.order_by(Todo.id)
+    todos = db.scalars(statement).all()
+    return list(todos)
