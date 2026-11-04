@@ -1,3 +1,4 @@
+from app.models import Todo
 from tests.helpers import auth_headers, create_todo, create_user
 
 NEW_TODO = {"title": "Buy milk", "description": "2 litres, oat", "priority": 3}
@@ -92,3 +93,20 @@ def test_update_someone_elses_todo_is_404(client, db):
     assert response.status_code == 404
     db.refresh(bobs_todo)
     assert bobs_todo.title == "Buy milk"
+
+
+def test_delete_my_todo(client, db):
+    alice = create_user(db, "alice")
+    todo = create_todo(db, alice)
+    response = client.delete(f"/todos/{todo.id}", headers=auth_headers(alice))
+    assert response.status_code == 204
+    assert db.get(Todo, todo.id) is None
+
+
+def test_delete_someone_elses_todo_is_404(client, db):
+    alice = create_user(db, "alice")
+    bob = create_user(db, "bob")
+    bobs_todo = create_todo(db, bob)
+    response = client.delete(f"/todos/{bobs_todo.id}", headers=auth_headers(alice))
+    assert response.status_code == 404
+    assert db.get(Todo, bobs_todo.id) is not None

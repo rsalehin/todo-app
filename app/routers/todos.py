@@ -62,3 +62,10 @@ def update_todo(todo_id: int, payload: TodoUpdate, user: CurrentUser, db: DbSess
     db.refresh(todo)
 
     return todo
+
+
+@router.delete("/{todo_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_todo(todo_id: int, user: CurrentUser, db: DbSession) -> None:
+    todo = get_todo_or_404(db, todo_id, user)
+    db.delete(todo)
+    db.commit()
