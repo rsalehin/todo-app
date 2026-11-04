@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import CurrentUser, DbSession
 from app.models import Todo, User
-from app.schemas import TodoCreate, TodoPublic
+from app.schemas import TodoCreate, TodoPublic, TodoUpdate
 
 router = APIRouter(prefix="/todos", tags=["todos"])
 
@@ -46,4 +46,19 @@ def list_todos(db: DbSession, user: CurrentUser) -> list[Todo]:
 @router.get("/{todo_id}", response_model=TodoPublic)
 def read_todo(todo_id: int, user: CurrentUser, db: DbSession) -> Todo:
     todo = get_todo_or_404(db, todo_id, user)
+    return todo
+
+
+@router.put("/{todo_id}", response_model=TodoPublic)
+def update_todo(todo_id: int, payload: TodoUpdate, user: CurrentUser, db: DbSession) -> Todo:
+    todo = get_todo_or_404(db, todo_id, user)
+
+    todo.title = payload.title
+    todo.description = payload.description
+    todo.priority = payload.priority
+    todo.completed = payload.completed
+
+    db.commit()
+    db.refresh(todo)
+
     return todo
