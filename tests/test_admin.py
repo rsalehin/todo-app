@@ -1,3 +1,6 @@
+import pytest
+
+from app.cli import create_admin, main
 from app.models import Role, Todo
 from tests.helpers import auth_headers, create_todo, create_user
 
@@ -50,3 +53,38 @@ def test_admin_delete_missing_todo_is_404(client, db):
     response = client.delete("/admin/todos/2", headers=auth_headers(boss))
 
     assert response.status_code == 404
+
+
+def test_create_admin_makes_an_admin(db):
+    admin = create_admin(db, "boss", "boss@example.com", "correct-horse-battery")
+    assert admin.role == Role.ADMIN
+
+
+def test_create_admin_rejects_a_taken_username(db):
+    create_admin(db, "boss", "boss@example.com", "correct-horse-battery")
+    with pytest.raises(SystemExit):
+        create_admin(db, "boss", "other@example.com", "correct-horse-battery")
+
+
+def fake_getpass_short(prompt):
+    return "short"
+
+
+def test_cli_rejects_short_password(monkeypatch):
+    monkeypatch.setattr("getpass.getpass", fake_getpass_short)
+    with pytest.raises(SystemExit):
+        main(["create-admin", "--username", "boss", "--email", "boss@example.com"])
+
+
+def test_cli_creates_admin(monkeypatch, db, capsys):
+    def fake_getpass(prompt):
+        return "correct-horse-battery"
+
+    def fake_session_local():
+        return db
+
+    monkeypatch.setattr("getpass.getpass", fake_getpass)
+    monkeypatch.setattr("app.cli.SessionLocal", fake_session_local)
+    main(["create-admin", "--username", "boss", "--email", "boss@gmail.com"])
+    output = capsys.readouterr().out
+    assert "Admin 'boss' created" in output
