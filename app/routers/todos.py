@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -36,9 +38,15 @@ def create_todo(payload: TodoCreate, user: CurrentUser, db: DbSession) -> Todo:
 
 
 @router.get("", response_model=list[TodoPublic])
-def list_todos(db: DbSession, user: CurrentUser) -> list[Todo]:
+def list_todos(
+    db: DbSession,
+    user: CurrentUser,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+) -> list[Todo]:
     statement = select(Todo).where(Todo.owner_id == user.id)
     statement = statement.order_by(Todo.id)
+    statement = statement.limit(limit).offset(offset)
     todos = db.scalars(statement).all()
     return list(todos)
 

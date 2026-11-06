@@ -110,3 +110,22 @@ def test_delete_someone_elses_todo_is_404(client, db):
     response = client.delete(f"/todos/{bobs_todo.id}", headers=auth_headers(alice))
     assert response.status_code == 404
     assert db.get(Todo, bobs_todo.id) is not None
+
+
+def test_list_supports_limit_and_offset(client, db):
+    alice = create_user(db, "alice")
+    for i in range(1, 6):
+        create_todo(db, alice, title=f"Todo {i}")
+    params = {"limit": 2, "offset": 1}
+    response = client.get("/todos", params=params, headers=auth_headers(alice))
+    titles = []
+    for todo in response.json():
+        titles.append(todo["title"])
+
+    assert titles == ["Todo 2", "Todo 3"]
+
+
+def test_list_with_too_large_limit_is_422(client, db):
+    alice = create_user(db, "alice")
+    response = client.get("/todos", params={"limit": 101}, headers=auth_headers(alice))
+    assert response.status_code == 422
