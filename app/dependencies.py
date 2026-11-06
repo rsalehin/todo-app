@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import User
+from app.models import Role, User
 from app.security import decode_access_token
 
 DbSession = Annotated[Session, Depends(get_db)]
@@ -40,3 +40,12 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: DbSessio
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def require_admin(user: CurrentUser) -> User:
+    if user.role != Role.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+    return user
+
+
+AdminUser = Annotated[User, Depends(require_admin)]

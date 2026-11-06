@@ -1,17 +1,18 @@
 from sqlalchemy.orm import Session
 
-from app.models import Todo, User
+from app.models import Role, Todo, User
 from app.security import create_access_token, hash_password
 
 password = "it-is-a-fake-password"
 
 
-def create_user(db: Session, username: str) -> User:
+def create_user(db: Session, username: str, role: str = Role.USER) -> User:
     user = User(
         username=f"{username}",
         first_name="Alice",
         last_name="Smith",
         hashed_password=hash_password(password),
+        role=role,
         email=f"{username}@example.com",
     )
     db.add(user)
