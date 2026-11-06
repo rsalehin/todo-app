@@ -26,6 +26,7 @@ def test_defaults_apply_when_not_set(monkeypatch):
     assert settings.database_url == "sqlite:///./todosapp.db"
     assert settings.jwt_algorithm == "HS256"
     assert settings.access_token_expires_minutes == 20
+    assert settings.log_level == "INFO"
 
 
 def test_string_from_environment_is_converted_to_int(monkeypatch):
@@ -65,3 +66,10 @@ def test_invalid_minutes_are_rejected(monkeypatch, bad_value):
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRES_MINUTES", bad_value)
     with pytest.raises(ValidationError):
         Settings(_env_file=None)
+
+
+def test_unknown_log_level_is_rejected(monkeypatch):
+    monkeypatch.setenv("SECRET_KEY", KEY)
+    monkeypatch.setenv("LOG_LEVEL", "LOUD")
+    with pytest.raises(ValidationError):
+        Settings(_env_files=None)
