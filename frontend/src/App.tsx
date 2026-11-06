@@ -1,30 +1,32 @@
-import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router";
+import RequireAuth from "./auth/RequireAuth";
+import ApiStatus from "./components/ApiStatus";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import TodosPage from "./pages/TodosPage";
 
+// Which page belongs to which URL.
 function App() {
-  const [apiStatus, setApiStatus] = useState("checking...");
-
-  useEffect(() => {
-    async function checkHealth() {
-      try {
-        const response = await fetch("/api/health");
-        if (response.ok) {
-          setApiStatus("ok");
-        } else {
-          setApiStatus(`error ${response.status}`);
-        }
-      } catch {
-        setApiStatus("unreachable");
-      }
-    }
-
-    void checkHealth();
-  }, []);
-
   return (
-    <main>
-      <h1>Todo App</h1>
-      <p>API status: {apiStatus}</p>
-    </main>
+    <>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/todos"
+          element={
+            <RequireAuth>
+              <TodosPage />
+            </RequireAuth>
+          }
+        />
+        {/* Any other URL: go to the todos page (which sends you to /login if needed). */}
+        <Route path="*" element={<Navigate to="/todos" replace />} />
+      </Routes>
+      <footer>
+        <ApiStatus />
+      </footer>
+    </>
   );
 }
 
