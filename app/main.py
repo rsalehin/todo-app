@@ -5,7 +5,10 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.database import Base, engine
+from app.logging_config import configure_logging
 from app.routers import admin, auth, todos, users
+
+configure_logging(settings.log_level)
 
 
 @asynccontextmanager
