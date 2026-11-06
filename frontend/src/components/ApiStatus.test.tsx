@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, expect, test, vi } from "vitest";
-import App from "./App";
+import App from "./ApiStatus";
 
 afterEach(() => {
   // Put the real fetch back after each test.
