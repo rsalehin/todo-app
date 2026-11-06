@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.database import Base, engine
-from app.routers import auth, todos, users
+from app.routers import admin, auth, todos, users
 
 
 @asynccontextmanager
@@ -18,6 +18,7 @@ app = FastAPI(title=settings.app_name, lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(todos.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")
