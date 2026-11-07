@@ -25,3 +25,11 @@ export async function loginViaUi(page: Page, username: string, password: string)
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Log in" }).click();
 }
+
+// Created before the E2E backend starts by scripts/e2e_create_admin.py (keep in sync).
+export const E2E_ADMIN = { username: "e2e-admin", password: "correct-horse-battery" };
+
+export async function logoutViaUi(page: Page) {
+  await page.getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL(/\/login$/);
+}

@@ -37,7 +37,8 @@ export default defineConfig({
   // Start backend and frontend before running tests.
   webServer: [
     {
-      command: "uv run fastapi run app/main.py --port 8001",
+      command:       // First make sure the E2E admin exists, then start the server ("&&": only if step 1 worked).
+        "uv run python -m scripts.e2e_create_admin && uv run fastapi run app/main.py --port 8001",
       cwd: "..",
       url: "http://127.0.0.1:8001/health",
       reuseExistingServer: false,
