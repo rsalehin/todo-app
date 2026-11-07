@@ -29,7 +29,7 @@ export type Todo = {
   title: string;
   description: string;
   priority: number;
-  complete: boolean;
+  completed: boolean;
   owner_id: number;
 };
 
@@ -38,5 +38,5 @@ export type TodoInput = {
   title: string;
   description: string;
   priority: number;
-  complete: boolean;
+  completed: boolean;
 };
