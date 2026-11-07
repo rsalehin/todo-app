@@ -2,6 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 // CI is set to "true" by GitHub Actions; locally it's undefined.
 const isCI = process.env.CI !== undefined;
+// Set E2E_BASE_URL to test a stack that is already running (e.g. Docker Compose on
+// http://localhost:8080). Without it, Playwright starts its own backend and dev server.
+const externalBaseUrl = process.env.E2E_BASE_URL;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -15,7 +18,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
 
   use: {
-    baseURL: "http://localhost:5174",
+    baseURL: externalBaseUrl ?? "http://localhost:5174",
 
     trace: "on-first-retry",
     screenshot: "only-on-failure",
@@ -35,25 +38,28 @@ export default defineConfig({
   ],
 
   // Start backend and frontend before running tests.
-  webServer: [
-    {
-      command:       // First make sure the E2E admin exists, then start the server ("&&": only if step 1 worked).
-        "uv run python -m scripts.e2e_create_admin && uv run fastapi run app/main.py --port 8001",
-      cwd: "..",
-      url: "http://127.0.0.1:8001/health",
-      reuseExistingServer: false,
-      env: {
-        DATABASE_URL: "sqlite:///./e2e.db",
-        SECRET_KEY: "e2e-secret-key-not-for-production-0123456789",
-      },
-    },
-    {
-      command: "npm run dev -- --port 5174 --strictPort",
-      url: "http://localhost:5174",
-      reuseExistingServer: false,
-      env: {
-        API_URL: "http://127.0.0.1:8001",
-      },
-    },
-  ],
+  webServer:
+    externalBaseUrl !== undefined
+      ? []
+      : [
+          {
+            command:
+              "uv run python -m scripts.e2e_create_admin && uv run fastapi run app/main.py --port 8001",
+            cwd: "..",
+            url: "http://127.0.0.1:8001/health",
+            reuseExistingServer: false,
+            env: {
+              DATABASE_URL: "sqlite:///./e2e.db",
+              SECRET_KEY: "e2e-secret-key-not-for-production-0123456789",
+            },
+          },
+          {
+            command: "npm run dev -- --port 5174 --strictPort",
+            url: "http://localhost:5174",
+            reuseExistingServer: false,
+            env: {
+              API_URL: "http://127.0.0.1:8001",
+            },
+          },
+        ],
 });

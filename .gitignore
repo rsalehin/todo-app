@@ -6,7 +6,7 @@ dist/
 wheels/
 *.egg-info
 .vscode/
-
+frontend/
 # Virtual environments
 .venv
 
