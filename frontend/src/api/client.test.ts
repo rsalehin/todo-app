@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest";
 import { saveToken } from "../auth/token";
 import { jsonResponse } from "../test/responses";
-import { ApiError, getMe, login, register } from "./client";
+import { ApiError, deleteTodo, getMe, listTodos, login, register } from "./client";
 
 test("login sends form data and returns the token", async () => {
   const fakeFetch = vi
@@ -60,4 +60,27 @@ test("getMe sends the saved token", async () => {
   const [url, options] = fakeFetch.mock.calls[0];
   expect(url).toBe("/api/users/me");
   expect(options.headers).toEqual({ Authorization: "Bearer abc" });
+});
+
+test("listTodos puts limit and offset in the query string", async () => {
+  saveToken("abc");
+  const fakeFetch = vi.fn().mockResolvedValue(jsonResponse(200, []));
+  vi.stubGlobal("fetch", fakeFetch);
+
+  await listTodos(5, 10);
+
+  const [url] = fakeFetch.mock.calls[0];
+  expect(url).toBe("/api/todos?limit=5&offset=10");
+});
+
+test("deleteTodo sends DELETE and accepts an empty 204 response", async () => {
+  saveToken("abc");
+  const fakeFetch = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+  vi.stubGlobal("fetch", fakeFetch);
+
+  await deleteTodo(7);
+
+  const [url, options] = fakeFetch.mock.calls[0];
+  expect(url).toBe("/api/todos/7");
+  expect(options.method).toBe("DELETE");
 });

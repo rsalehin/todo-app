@@ -23,3 +23,20 @@ export type Token = {
   access_token: string;
   token_type: string;
 };
+
+export type Todo = {
+  id: number;
+  title: string;
+  description: string;
+  priority: number;
+  complete: boolean;
+  owner_id: number;
+};
+
+// What we send to create or replace a todo (TodoCreate / TodoUpdate in the backend).
+export type TodoInput = {
+  title: string;
+  description: string;
+  priority: number;
+  complete: boolean;
+};
