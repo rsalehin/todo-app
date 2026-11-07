@@ -10,12 +10,12 @@ import TodosPage from "./TodosPage";
 const ALICE = { id: 1, username: "alice", role: "user" };
 
 // A tiny in-memory stand-in for the backend: it answers the requests this page makes.
-function fakeBackend(todos: Todo[]) {
+function fakeBackend(todos: Todo[], me: object = ALICE) {
   return vi.fn((url: string, options?: RequestInit) => {
     const method = options?.method ?? "GET";
 
     if (url === "/api/users/me") {
-      return Promise.resolve(jsonResponse(200, ALICE));
+      return Promise.resolve(jsonResponse(200, me));
     }
     if (url.startsWith("/api/todos") && method === "GET") {
       return Promise.resolve(jsonResponse(200, todos));
@@ -87,4 +87,20 @@ test("adding a todo sends it to the API and reloads the list", async () => {
   await user.click(screen.getByRole("button", { name: "Add" }));
 
   expect(await screen.findByRole("checkbox", { name: "Pay rent" })).toBeInTheDocument();
+});
+test("the Admin link is shown to admins only", async () => {
+  saveToken("abc");
+  vi.stubGlobal("fetch", fakeBackend([], { id: 9, username: "boss", role: "admin" }));
+  renderTodosPage();
+
+  expect(await screen.findByRole("link", { name: "Admin" })).toBeInTheDocument();
+});
+
+test("a normal user sees no Admin link", async () => {
+  saveToken("abc");
+  vi.stubGlobal("fetch", fakeBackend([]));
+  renderTodosPage();
+
+  expect(await screen.findByText(/Logged in as alice/)).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Admin" })).not.toBeInTheDocument();
 });

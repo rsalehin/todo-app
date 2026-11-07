@@ -4,6 +4,7 @@ import ApiStatus from "./components/ApiStatus";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import TodosPage from "./pages/TodosPage";
+import AdminPage from "./pages/AdminPage";
 
 // Which page belongs to which URL.
 function App() {
@@ -17,6 +18,14 @@ function App() {
           element={
             <RequireAuth>
               <TodosPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <RequireAuth>
+              <AdminPage />
             </RequireAuth>
           }
         />
