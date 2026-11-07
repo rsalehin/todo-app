@@ -1,7 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
 import { PASSWORD, loginViaUi, registerViaUi, uniqueUsername } from "./helpers.ts";
-
 
 test("register, log in, stay logged in after reload, log out", async ({ page }) => {
   const username = uniqueUsername();

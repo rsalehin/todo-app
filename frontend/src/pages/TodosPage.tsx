@@ -18,7 +18,7 @@ function TodosPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-    function logout() {
+  function logout() {
     // The token is simply forgotten. (A JWT can't be "switched off" on the server;
     // it stays valid until it expires, which is why its lifetime is short.)
     clearToken();
@@ -77,7 +77,7 @@ function TodosPage() {
     setReloadCount(reloadCount + 1);
   }
 
-   async function handleCreate(values: TodoFormValues): Promise<boolean> {
+  async function handleCreate(values: TodoFormValues): Promise<boolean> {
     setError("");
     try {
       await createTodo({
@@ -137,7 +137,7 @@ function TodosPage() {
     }
   }
 
-    if (user === null) {
+  if (user === null) {
     return <p>Loading...</p>;
   }
 
@@ -150,11 +150,9 @@ function TodosPage() {
           Log out
         </button>
       </p>
-
       <h2>New todo</h2>
       <TodoForm submitLabel="Add" onSubmit={handleCreate} />
       {error !== "" && <p role="alert">{error}</p>}
-
       <h2>List</h2>
       {todos.length === 0 && <p>No todos on this page.</p>}
       <ul>
@@ -169,7 +167,7 @@ function TodosPage() {
           />
         ))}
       </ul>
-            <button type="button" disabled={offset === 0} onClick={() => setOffset(offset - PAGE_SIZE)}>
+      <button type="button" disabled={offset === 0} onClick={() => setOffset(offset - PAGE_SIZE)}>
         Previous
       </button>{" "}
       {/* A full page might have more after it; a shorter page is the last one. */}
