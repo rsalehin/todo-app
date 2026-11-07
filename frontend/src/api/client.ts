@@ -1,6 +1,6 @@
 // Every call to the backend lives in this file. Pages never call fetch directly.
 import { getToken } from "../auth/token";
-import type { Token, UserCreate, UserPublic } from "./types";
+import type { Todo, TodoInput, Token, UserCreate, UserPublic } from "./types";
 
 // An error that remembers the HTTP status, so pages can react to 401, 409, 422, ...
 export class ApiError extends Error {
@@ -72,4 +72,52 @@ export async function getMe(): Promise<UserPublic> {
     throw await errorFrom(response);
   }
   return await response.json();
+}
+
+export async function listTodos(limit: number, offset: number): Promise<Todo[]> {
+  // Query parameters go in the URL: /api/todos?limit=5&offset=10
+  const query = new URLSearchParams();
+  query.append("limit", String(limit));
+  query.append("offset", String(offset));
+
+  const response = await fetch(`/api/todos?${query.toString()}`, { headers: authHeaders() });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+  return await response.json();
+}
+
+export async function createTodo(data: TodoInput): Promise<Todo> {
+  const response = await fetch("/api/todos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+  return await response.json();
+}
+
+export async function updateTodo(id: number, data: TodoInput): Promise<Todo> {
+  const response = await fetch(`/api/todos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+  return await response.json();
+}
+
+export async function deleteTodo(id: number): Promise<void> {
+  const response = await fetch(`/api/todos/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+  // 204 No Content: there is no body, so we don't call response.json().
 }
