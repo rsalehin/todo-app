@@ -20,6 +20,6 @@ export default defineConfig({
     // jsdom: a simulated browser page inside Node, so components can render in tests.
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
-    include: ["src/**/*.test.{ts, tsx}"],
+    include: ["src/**/*.test.{ts,tsx}"],
   },
 });

@@ -9,7 +9,7 @@ const TODO: Todo = {
   title: "Buy milk",
   description: "2 litres, oat",
   priority: 3,
-  complete: false,
+  completed: false,
   owner_id: 1,
 };
 

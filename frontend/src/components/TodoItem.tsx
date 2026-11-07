@@ -42,7 +42,7 @@ function TodoItem({ todo, onToggle, onSave, onDelete }: TodoItemProps) {
     return (
     <li>
       <label>
-        <input type="checkbox" checked={todo.complete} onChange={() => onToggle(todo)} />
+        <input type="checkbox" checked={todo.completed} onChange={() => onToggle(todo)} />
         {todo.title}
       </label>{" "}
       — {todo.description} (priority {todo.priority}){" "}

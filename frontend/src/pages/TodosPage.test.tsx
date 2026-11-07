@@ -68,7 +68,7 @@ test("an expired token sends you back to /login", async () => {
 test("shows my todos", async () => {
   saveToken("abc");
   const todos: Todo[] = [
-    { id: 1, title: "Buy milk", description: "oat", priority: 3, complete: false, owner_id: 1 },
+    { id: 1, title: "Buy milk", description: "oat", priority: 3, completed: false, owner_id: 1 },
   ];
   vi.stubGlobal("fetch", fakeBackend(todos));
   renderTodosPage();

@@ -84,7 +84,7 @@ function TodosPage() {
         title: values.title,
         description: values.description,
         priority: values.priority,
-        complete: false,
+        completed: false,
       });
       reload();
       return true;
@@ -102,7 +102,7 @@ function TodosPage() {
         title: todo.title,
         description: todo.description,
         priority: todo.priority,
-        complete: !todo.complete,
+        completed: !todo.completed,
       });
       reload();
     } catch (err) {
@@ -117,7 +117,7 @@ function TodosPage() {
         title: values.title,
         description: values.description,
         priority: values.priority,
-        complete: todo.complete,
+        completed: todo.completed,
       });
       reload();
       return true;
