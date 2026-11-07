@@ -121,3 +121,23 @@ export async function deleteTodo(id: number): Promise<void> {
   }
   // 204 No Content: there is no body, so we don't call response.json().
 }
+
+// Admin only: every user's todos. The backend answers 403 for everyone else.
+export async function listAllTodos(): Promise<Todo[]> {
+  const response = await fetch("/api/admin/todos", { headers: authHeaders() });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+  return await response.json();
+}
+
+// Admin only: delete any user's todo.
+export async function deleteAnyTodo(id: number): Promise<void> {
+  const response = await fetch(`/api/admin/todos/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw await errorFrom(response);
+  }
+}

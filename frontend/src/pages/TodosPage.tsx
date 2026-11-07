@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { ApiError, createTodo, deleteTodo, getMe, listTodos, updateTodo } from "../api/client";
 import type { Todo, UserPublic } from "../api/types";
 import { clearToken } from "../auth/token";
 import TodoForm from "../components/TodoForm";
 import type { TodoFormValues } from "../components/TodoForm";
 import TodoItem from "../components/TodoItem";
+import { Link, useNavigate } from "react-router";
 
 const PAGE_SIZE = 5;
 
@@ -148,7 +148,9 @@ function TodosPage() {
         Logged in as {user.username}{" "}
         <button type="button" onClick={logout}>
           Log out
-        </button>
+        </button>{" "}
+        {/* Only admins see the link. (The backend protects the page itself.) */}
+        {user.role === "admin" && <Link to="/admin">Admin</Link>}
       </p>
       <h2>New todo</h2>
       <TodoForm submitLabel="Add" onSubmit={handleCreate} />

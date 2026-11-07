@@ -1,7 +1,16 @@
 import { expect, test, vi } from "vitest";
 import { saveToken } from "../auth/token";
 import { jsonResponse } from "../test/responses";
-import { ApiError, deleteTodo, getMe, listTodos, login, register } from "./client";
+import {
+  ApiError,
+  deleteAnyTodo,
+  deleteTodo,
+  getMe,
+  listAllTodos,
+  listTodos,
+  login,
+  register,
+} from "./client";
 
 test("login sends form data and returns the token", async () => {
   const fakeFetch = vi
@@ -83,4 +92,20 @@ test("deleteTodo sends DELETE and accepts an empty 204 response", async () => {
   const [url, options] = fakeFetch.mock.calls[0];
   expect(url).toBe("/api/todos/7");
   expect(options.method).toBe("DELETE");
+});
+
+test("the admin functions call the admin endpoints", async () => {
+  saveToken("abc");
+  const fakeFetch = vi
+    .fn()
+    .mockResolvedValueOnce(jsonResponse(200, []))
+    .mockResolvedValueOnce(new Response(null, { status: 204 }));
+  vi.stubGlobal("fetch", fakeFetch);
+
+  await listAllTodos();
+  await deleteAnyTodo(7);
+
+  expect(fakeFetch.mock.calls[0][0]).toBe("/api/admin/todos");
+  expect(fakeFetch.mock.calls[1][0]).toBe("/api/admin/todos/7");
+  expect(fakeFetch.mock.calls[1][1].method).toBe("DELETE");
 });
