@@ -7,6 +7,9 @@ on:
 
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request'}}
 
 jobs:
   checks:
@@ -86,3 +89,60 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  stack:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-only-secret-key-not-used-anywhere-else
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.3
+
+      - name: Install backend dependencies (for the smoke test)
+        run: uv sync --locked
+
+      - name: Build and start the stack
+        run: docker compose up --build --detach --wait
+
+      - name: Smoke test through nginx
+        run: uv run python scripts/smoke_test.py http://localhost:8080/api
+
+      - name: Seed the E2E admin
+        run: docker compose exec -T api python -m scripts.e2e_create_admin
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests against the stack
+        working-directory: frontend
+        env:
+          E2E_BASE_URL: http://localhost:8080
+        run: npm run e2e
+
+      - name: Show container logs
+        if: failure()
+        run: docker compose logs
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-stack
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes
